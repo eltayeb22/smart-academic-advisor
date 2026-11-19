@@ -1,11 +1,13 @@
 # Smart Academic Advisor
 
+[![Next.js](https://img.shields.io/badge/Next.js-15%20App%20Router-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Vercel%20API-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Google GenAI](https://img.shields.io/badge/Google%20GenAI-Gemini%20API-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-Interactive%20UI-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-Backup%20UI-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
 [![Pydantic](https://img.shields.io/badge/Pydantic-Data%20Validation-E92063?logo=pydantic&logoColor=white)](https://docs.pydantic.dev/)
 
-An AI-powered **Smart Academic Advisor** built with **Python**, the **`google-genai` SDK**, and **Streamlit**.  
+An AI-powered **Smart Academic Advisor** built with a **Next.js (TypeScript + Tailwind CSS)** frontend, a **Vercel-ready FastAPI** backend, and the **`google-genai` SDK** (with a standalone **Streamlit** backup UI in `app.py`).  
 It combines **Retrieval-Augmented Generation (RAG)** over official university credit-hour bylaws with **deterministic Function Calling tools** so that every GPA calculation, prerequisite check, and course recommendation is mathematically exact and grounded in academic regulations.
 
 ---
@@ -77,7 +79,18 @@ smart-academic-advisor/
 ├── .gitignore                        # Excludes secrets (.env) & personal student records
 ├── config.py                         # Grading scale, bylaw rules, paths, and model config
 ├── test_core.py                      # Core logic & GPA calculation verification suite
-├── app.py                            # Interactive Streamlit application
+├── test_api.py                       # FastAPI endpoint verification suite
+├── app.py                            # Interactive Streamlit application (backup UI)
+├── next.config.ts                    # Next.js dev proxy (/api/* -> 127.0.0.1:8000)
+├── vercel.json                       # Vercel rewrites routing /api/* to api/index.py
+├── package.json                      # Next.js 15, React 19, Tailwind CSS, Lucide icons
+├── api/
+│   ├── __init__.py
+│   └── index.py                      # Vercel-ready FastAPI backend API for Next.js frontend
+├── src/
+│   ├── app/                          # Next.js App Router (layout, globals, main page)
+│   ├── components/                   # HeaderKPIs, AdvisorChat, TranscriptTab, GpaSimulator, CourseCatalog
+│   └── lib/                          # Typed API client, grading engine, TypeScript schemas
 ├── core/
 │   ├── __init__.py
 │   ├── advisor_agent.py              # Gemini client wrapper with tools & fast failover
@@ -151,15 +164,43 @@ The app starts with a clean empty transcript table by default. Open the **Transc
 
 All saved changes are stored privately in `data/student_record.json` (gitignored by default).
 
-### 5. Run the Application
+### 5. Run Full-Stack Locally (Next.js + FastAPI) or Streamlit Backup
 ```bash
+# Terminal 1 — Start FastAPI backend:
+uvicorn api.index:app --reload
+
+# Terminal 2 — Install & start Next.js frontend (http://localhost:3000):
+npm install
+npm run dev
+
+# Or run the Streamlit backup UI:
 streamlit run app.py
 ```
 
-### 6. Run the Automated Core Tests
+### 6. Deploy on Vercel
+1. Import this GitHub repository into Vercel.
+2. Add `GEMINI_API_KEY` under **Project Settings -> Environment Variables**.
+3. Deploy — Vercel serves the Next.js App Router frontend and automatically routes `/api/*` to `api/index.py`.
+
+### 7. Run the Automated Tests
 ```bash
 python test_core.py
+python test_api.py
 ```
+
+---
+
+## FastAPI Backend Endpoints (`api/index.py`)
+
+Designed for Vercel Serverless deployment and Next.js frontend integration (`GEMINI_API_KEY` is read strictly from server environment variables):
+
+| Method | Endpoint | Description |
+| :---: | :--- | :--- |
+| `GET` | `/api/health` | Verifies API health, loaded course count, bylaws status, and server Gemini key configuration |
+| `GET` | `/api/courses` | Returns curriculum courses with resolved prerequisite course names (supports `level`, `category`, `search` filters) |
+| `POST` | `/api/simulate-gpa` | Computes projected semester/cumulative GPA and academic standing from student record and expected grades |
+| `POST` | `/api/parse-transcript` | Parses uploaded transcript PDF/images via `gemini-3.8-flash` (with Retry + Fallback) into `StudentRecord` JSON |
+| `POST` | `/api/chat` | Stateless AI advisor chat powered by `AcademicAdvisorAgent`, college bylaws RAG, and deterministic tools |
 
 ---
 

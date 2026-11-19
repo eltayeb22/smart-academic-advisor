@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+from contextvars import ContextVar
 from typing import List, Dict, Optional, Any
 import json
 from pathlib import Path
@@ -15,8 +17,27 @@ from config import (
 )
 from utils.transcript_parser import load_student_record, load_course_catalog, StudentRecord, CourseCatalog
 
+_student_override: ContextVar[Optional[StudentRecord]] = ContextVar(
+    "student_override", default=None
+)
+
+@contextmanager
+def student_record_context(record: Optional[StudentRecord]):
+    """Request-scoped override for stateless API execution without touching disk."""
+    if record is None:
+        yield
+        return
+    token = _student_override.set(record)
+    try:
+        yield
+    finally:
+        _student_override.reset(token)
+
 def _get_active_student() -> StudentRecord:
-    """Helper to load the current active student record."""
+    """Helper to load the current active student record (request-scoped or local file)."""
+    override = _student_override.get()
+    if override is not None:
+        return override
     return load_student_record(get_student_record_path())
 
 def _get_active_catalog() -> CourseCatalog:

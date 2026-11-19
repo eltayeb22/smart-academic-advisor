@@ -2,6 +2,7 @@ import csv
 import io
 import json
 import re
+import time
 from typing import Any, Dict, List, Optional, Tuple
 
 from config import DEFAULT_MODEL, GRADE_POINTS
@@ -284,12 +285,14 @@ def parse_transcript_with_gemini(
     file_bytes: bytes,
     mime_type: str,
     api_key: str,
-    model_name: Optional[str] = None,
+    model_name: Optional[str] = "gemini-3.8-flash",
     catalog: Optional[CourseCatalog] = None,
+    max_retries: int = 3,
 ) -> Dict[str, Any]:
     """
     Uses Google Gemini multimodal structured output to extract student metadata,
     completed courses, and registered courses from an uploaded transcript PDF or image.
+    Includes automatic retry with backoff and fallback model chain on 503/429 errors.
     """
     if not api_key:
         raise ValueError("A valid Google Gemini API Key is required for AI transcript extraction.")
@@ -331,31 +334,44 @@ Rules:
 """
 
     candidate_models = []
-    for m in [model_name or DEFAULT_MODEL, "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.8-flash"]:
+    for m in [model_name or "gemini-3.8-flash", "gemini-3.5-flash-lite", "gemini-3.5-flash"]:
         if m and m not in candidate_models:
             candidate_models.append(m)
 
     last_error = None
     raw_json_text = None
+    model_used = candidate_models[0]
 
     part = types.Part.from_bytes(data=file_bytes, mime_type=mime_type)
 
     for current_model in candidate_models:
-        try:
-            response = client.models.generate_content(
-                model=current_model,
-                contents=[part, extraction_prompt],
-                config=types.GenerateContentConfig(
-                    temperature=0.0,
-                    response_mime_type="application/json",
-                ),
-            )
-            raw_json_text = response.text
-            if raw_json_text:
+        for attempt in range(1, max_retries + 1):
+            try:
+                response = client.models.generate_content(
+                    model=current_model,
+                    contents=[part, extraction_prompt],
+                    config=types.GenerateContentConfig(
+                        temperature=0.0,
+                        response_mime_type="application/json",
+                    ),
+                )
+                raw_json_text = response.text
+                if raw_json_text:
+                    model_used = current_model
+                    break
+            except Exception as e:
+                last_error = e
+                err_lower = str(e).lower()
+                is_transient = any(
+                    tag in err_lower
+                    for tag in ("503", "unavailable", "429", "resourceexhausted", "overloaded", "timeout")
+                )
+                if is_transient and attempt < max_retries:
+                    time.sleep(0.8 * attempt)
+                    continue
                 break
-        except Exception as e:
-            last_error = e
-            continue
+        if raw_json_text:
+            break
 
     if not raw_json_text:
         raise RuntimeError(f"Failed to extract transcript via Gemini: {last_error}")
@@ -411,7 +427,43 @@ Rules:
         "major": str(parsed.get("major", "") or "").strip(),
         "completed_courses": completed_records,
         "registered_courses": registered_records,
+        "model_used": model_used,
     }
+
+
+def build_student_record_from_extracted(extracted: Dict[str, Any]) -> StudentRecord:
+    """Converts extracted transcript dict into a fully calculated StudentRecord."""
+    record = StudentRecord(
+        student_id=extracted.get("student_id") or "",
+        student_name=extracted.get("student_name") or "Student",
+        major=extracted.get("major") or "Data Sciences & Analytics",
+        academic_level=1,
+        current_gpa=0.0,
+        total_completed_credits=0,
+        total_quality_points=0.0,
+        academic_standing="Good Standing",
+        completed_courses=extracted.get("completed_courses", []),
+        registered_courses=extracted.get("registered_courses", []),
+    )
+    record.recalculate_academic_metrics()
+    # Infer academic level from completed credits (35 credits per level in 140-credit program)
+    credits = record.total_completed_credits
+    if credits >= 105:
+        record.academic_level = 4
+    elif credits >= 70:
+        record.academic_level = 3
+    elif credits >= 35:
+        record.academic_level = 2
+    else:
+        record.academic_level = 1
+
+    if not record.completed_courses:
+        record.academic_standing = "New Student"
+    elif record.current_gpa < 2.0:
+        record.academic_standing = "Academic Probation"
+    else:
+        record.academic_standing = "Good Standing"
+    return record
 
 
 def _decode_bytes(file_bytes: bytes) -> str:

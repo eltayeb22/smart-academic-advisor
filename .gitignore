@@ -17,6 +17,14 @@ venv/
 .venv/
 env/
 
+# Next.js & Vercel
+node_modules/
+.next/
+out/
+.vercel/
+next-env.d.ts
+*.tsbuildinfo
+
 # Streamlit
 .streamlit/secrets.toml
 

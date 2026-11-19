@@ -2,18 +2,20 @@ import os
 import time
 from typing import List, Dict, Any, Optional
 from config import DEFAULT_MODEL, FALLBACK_MODEL, GEMINI_API_KEY, get_student_record_path
-from utils.transcript_parser import load_student_record
+from utils.transcript_parser import StudentRecord, load_student_record
 from core.tools import (
+    _get_active_student,
     calculate_projected_gpa,
     get_eligible_courses,
-    analyze_academic_standing
+    analyze_academic_standing,
+    student_record_context,
 )
 from core.rag_engine import search_college_bylaws
 
-def build_advisor_system_instruction() -> str:
+def build_advisor_system_instruction(student: Optional[StudentRecord] = None) -> str:
     """Builds a contextualized, compact system instruction with live student data."""
     try:
-        student = load_student_record(get_student_record_path())
+        student = student if student is not None else _get_active_student()
         reg_courses_str = ", ".join([f"{c.course_code} {c.course_title} ({c.credit_hours}س)" for c in student.registered_courses]) or "لا توجد مواد مسجلة حالياً"
         reg_hours = sum(c.credit_hours for c in student.registered_courses)
         failed_str = ", ".join(student.get_failed_course_codes()) or "لا توجد"
@@ -46,15 +48,22 @@ def build_advisor_system_instruction() -> str:
         return """أنت المرشد الأكاديمي الذكي. ساعد الطالب باحترافية وسرعة ودقة."""
 
 class AcademicAdvisorAgent:
-    def __init__(self, api_key: Optional[str] = None, model_name: Optional[str] = None):
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        model_name: Optional[str] = None,
+        student_record: Optional[StudentRecord] = None,
+        initial_history: Optional[List[Dict[str, str]]] = None,
+    ):
         self.api_key = api_key or GEMINI_API_KEY or os.getenv("GEMINI_API_KEY", "")
         self.primary_model = model_name or DEFAULT_MODEL
         self.fallback_model = FALLBACK_MODEL or "gemini-3.5-flash-lite"
         self.active_model = self.primary_model
+        self.student_record = student_record
         
         self.client = None
         self.chat = None
-        self.history: List[Dict[str, str]] = []
+        self.history: List[Dict[str, str]] = list(initial_history) if initial_history else []
         
         self._initialize_client(self.active_model)
 
@@ -77,15 +86,25 @@ class AcademicAdvisorAgent:
             ]
 
             config = types.GenerateContentConfig(
-                system_instruction=build_advisor_system_instruction(),
+                system_instruction=build_advisor_system_instruction(self.student_record),
                 tools=tools,
                 temperature=0.2
             )
 
+            chat_history = []
+            for msg in self.history:
+                role = "model" if msg.get("role") in ("assistant", "model") else "user"
+                text = str(msg.get("content", "") or "").strip()
+                if text:
+                    chat_history.append(
+                        types.Content(role=role, parts=[types.Part.from_text(text=text)])
+                    )
+
             self.active_model = model
             self.chat = self.client.chats.create(
                 model=model,
-                config=config
+                config=config,
+                history=chat_history or None,
             )
         except Exception as e:
             print(f"Error initializing GenAI Client for model {model}: {e}")
@@ -110,32 +129,33 @@ class AcademicAdvisorAgent:
                 candidate_models.append(m)
 
         last_error = None
-        for current_model in candidate_models:
-            if current_model != self.active_model:
-                print(f"🔄 Switching model immediately to: {current_model}")
-                self._initialize_client(current_model)
+        with student_record_context(self.student_record):
+            for current_model in candidate_models:
+                if current_model != self.active_model:
+                    print(f"🔄 Switching model immediately to: {current_model}")
+                    self._initialize_client(current_model)
 
-            try:
-                response = self.chat.send_message(user_message)
-                answer_text = response.text if hasattr(response, "text") and response.text else "لم يتم الحصول على رد."
+                try:
+                    response = self.chat.send_message(user_message)
+                    answer_text = response.text if hasattr(response, "text") and response.text else "لم يتم الحصول على رد."
 
-                self.history.append({"role": "user", "content": user_message})
-                self.history.append({"role": "assistant", "content": answer_text})
+                    self.history.append({"role": "user", "content": user_message})
+                    self.history.append({"role": "assistant", "content": answer_text})
 
-                notice = ""
-                if current_model != self.primary_model:
-                    notice = f"\n\n*(⚡ تم الرد بواسطة الموديل فائق السرعة `{current_model}` لتفادي الضغط)*"
+                    notice = ""
+                    if current_model != self.primary_model:
+                        notice = f"\n\n*(⚡ تم الرد بواسطة الموديل فائق السرعة `{current_model}` لتفادي الضغط)*"
 
-                return {
-                    "response": answer_text + notice,
-                    "tools_used": [],
-                    "model_used": current_model
-                }
+                    return {
+                        "response": answer_text + notice,
+                        "tools_used": [],
+                        "model_used": current_model
+                    }
 
-            except Exception as e:
-                last_error = e
-                print(f"⚠️ فشل النموذج {current_model}: {e}. جاري التبديل للموديل التالي فوراً...")
-                continue
+                except Exception as e:
+                    last_error = e
+                    print(f"⚠️ فشل النموذج {current_model}: {e}. جاري التبديل للموديل التالي فوراً...")
+                    continue
 
         return {
             "response": f"⚠️ تعذر إتمام الاستجابة بسبب ضغط سيرفرات Google. تفاصيل الخطأ: {str(last_error)}",
