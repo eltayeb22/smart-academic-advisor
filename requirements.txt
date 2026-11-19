@@ -1,0 +1,18 @@
+# Google GenAI SDK (Official Modern SDK)
+google-genai>=1.0.0
+
+# Frontend & UI
+streamlit>=1.35.0
+pandas>=2.0.0
+
+# Data Validation & Modeling
+pydantic>=2.0.0
+
+# Environment Management
+python-dotenv>=1.0.0
+
+# PDF & Document Processing
+pypdf>=4.0.0
+
+# Vector Database & RAG
+chromadb>=0.5.0

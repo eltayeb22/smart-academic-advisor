@@ -1,0 +1,687 @@
+{
+  "courses": [
+    {
+      "code": "02-00-00001",
+      "name": "التفكير الناقد (Critical Thinking)",
+      "credit_hours": 2,
+      "prerequisites": [],
+      "department": "متطلبات الجامعة",
+      "category": "متطلب جامعة إجباري (University Mandatory)",
+      "level": 1,
+      "description": "تنمية مهارات التفكير النقدي، الاستدلال المنطقي، وتقييم الحجج والبراهين."
+    },
+    {
+      "code": "02-00-00002",
+      "name": "الابتكار وريادة الأعمال (Innovation & Entrepreneurship)",
+      "credit_hours": 2,
+      "prerequisites": [],
+      "department": "متطلبات الجامعة",
+      "category": "متطلب جامعة إجباري (University Mandatory)",
+      "level": 1,
+      "description": "مفاهيم ريادة الأعمال، تحويل الأفكار إلى مشروعات ناشئة، وتطوير نماذج الأعمال والابتكار."
+    },
+    {
+      "code": "02-24-00101",
+      "name": "الجبر الخطي (Linear Algebra)",
+      "credit_hours": 3,
+      "prerequisites": [],
+      "department": "العلوم الأساسية (Basic Sciences)",
+      "category": "متطلب كلية إجباري (College Mandatory)",
+      "level": 1,
+      "description": "Systems of linear equations, Matrices, Determinants, Euclidean spaces, Linear combinations and linear span, Subspaces, Linear independence, Basis and dimension, Rank of a matrix, Inner products, Eigen values and Eigen vectors."
+    },
+    {
+      "code": "02-24-00102",
+      "name": "حساب التفاضل والتكامل (Calculus)",
+      "credit_hours": 3,
+      "prerequisites": [],
+      "department": "العلوم الأساسية (Basic Sciences)",
+      "category": "متطلب كلية إجباري (College Mandatory)",
+      "level": 1,
+      "description": "Functions and models, Limits and derivatives, Differentiation rules, Applications of differentiation, Integrals and applications of integration, Techniques of integration, Differential equations, Partial differential equations."
+    },
+    {
+      "code": "02-24-00103",
+      "name": "مقدمة في نظم الحاسب (Introduction to Computer Systems)",
+      "credit_hours": 3,
+      "prerequisites": [],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب كلية إجباري (College Mandatory)",
+      "level": 1,
+      "description": "Introduction to computer systems, Representation and manipulation of information, Machine level representation of programs, Introduction to computer organization, Memory hierarchy, System I/O, Introduction to computer networks."
+    },
+    {
+      "code": "02-24-00104",
+      "name": "مقدمة في علوم البيانات (Introduction to Data Sciences)",
+      "credit_hours": 3,
+      "prerequisites": [],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب كلية إجباري (College Mandatory)",
+      "level": 1,
+      "description": "Introduction to data science, Data science ecosystem, Data representation and manipulation, Tools for data scientists, Data analytics tracks, Case studies using R."
+    },
+    {
+      "code": "02-24-00105",
+      "name": "البرمجة 1 (Programming I)",
+      "credit_hours": 3,
+      "prerequisites": [],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب كلية إجباري (College Mandatory)",
+      "level": 1,
+      "description": "Introduction to programming, Basic programming constructs, Branching and Iteration, Decomposition, Abstractions and Functions, Recursion, Structure types, Mutability, High order functions, Testing and debugging."
+    },
+    {
+      "code": "02-24-00106",
+      "name": "الاحتمالات والإحصاء 1 (Probability and Statistics I)",
+      "credit_hours": 3,
+      "prerequisites": [],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب كلية إجباري (College Mandatory)",
+      "level": 1,
+      "description": "Sets, Techniques of counting, Probability spaces, Independence and dependence, Conditional probabilities, Random variables, Expectation, variance, and moments, Moment generating functions, Independence of random variables, Conditional expectation, Discrete and continuous distributions, Joint and marginal distributions."
+    },
+    {
+      "code": "02-24-00107",
+      "name": "التراكيب المحددة (Discrete Structures)",
+      "credit_hours": 3,
+      "prerequisites": [],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب كلية إجباري (College Mandatory)",
+      "level": 1,
+      "description": "Sequences and Summations, Growth of functions, Logic and Predicates, Proof techniques, Recursive relations, Advanced counting techniques, Functions and Relations, Graph and Tree structures, Introduction to number theory: Groups, Rings, and Fields."
+    },
+    {
+      "code": "02-24-00108",
+      "name": "هياكل البيانات والخوارزميات (Data Structures and Algorithms)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00105"
+      ],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب كلية إجباري (College Mandatory)",
+      "level": 1,
+      "description": "Arrays, Linear lists, Queues, and Stacks, Tree structures and traversals, Dictionaries and Search trees, Heaps, Tries, Sorting and Searching, Hashing, Basic graph algorithms: Traversals, Minimum Spanning Trees, Shortest Paths."
+    },
+    {
+      "code": "02-24-00109",
+      "name": "مقدمة في الذكاء الاصطناعي (Introduction to Artificial Intelligence)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00103"
+      ],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب كلية إجباري (College Mandatory)",
+      "level": 1,
+      "description": "Reasoning, Intelligent agents, Knowledge representation techniques, Problem solving by searching, Constraint satisfaction problems, Logic programming, Uncertain knowledge and probabilistic reasoning, Planning, Applications."
+    },
+    {
+      "code": "02-24-00110",
+      "name": "البرمجة 2 (Programming II)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00105"
+      ],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب كلية إجباري (College Mandatory)",
+      "level": 1,
+      "description": "Object-oriented programming concepts, UML and requirement analysis, Object-oriented design, Encapsulation and information hiding, Separation of interface and implementation, Classes and objects, Methods, Members, Subclasses and inheritance, Polymorphism, Using an object-oriented programming language, Message passing, Operator overloading, Genericity, Programming using threads, Using APIs, Software design patterns."
+    },
+    {
+      "code": "02-24-00201",
+      "name": "الاحتمالات والإحصاء 2 (Probability and Statistics II)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00106"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب كلية إجباري (College Mandatory)",
+      "level": 2,
+      "description": "Normal distribution, Law of large numbers, Central limit theorem, Distributions derived from Normal distribution: Chi-squared, Student-t, and F distributions, Statistical estimation, Point estimation, Confidence intervals, Test of hypotheses, Fitting straight lines, Analysis of variance, Stochastic models, Poisson processes."
+    },
+    {
+      "code": "02-24-00202",
+      "name": "مقدمة في قواعد البيانات (Introduction to Databases)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00105"
+      ],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب كلية إجباري (College Mandatory)",
+      "level": 2,
+      "description": "Information management concepts, Database systems concepts, Data modeling, The relational data model and Relational algebra, Logical database design, Normalization, Query languages, Query optimization, Physical database design, B trees and Indices, Transaction processing concepts, Concurrency control, Recovery, Recent trends in database systems."
+    },
+    {
+      "code": "02-24-00203",
+      "name": "الحسابات العددية (Numerical Computations)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00101"
+      ],
+      "department": "العلوم الأساسية (Basic Sciences)",
+      "category": "متطلب كلية إجباري (College Mandatory)",
+      "level": 2,
+      "description": "Matrix manipulation, Simultaneous linear equations and matrix inversion, Vector space and basis, Eigen values and Eigen vectors, Approximation of roots of equations, Error analysis and Numerical instability, Numerical differentiation and integration, Interpolation and Extrapolation, Least-square approximation, Differential equations."
+    },
+    {
+      "code": "02-24-00204",
+      "name": "الحوسبة السحابية (Cloud Computing)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00108"
+      ],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب كلية إجباري (College Mandatory)",
+      "level": 2,
+      "description": "Introduction to Cloud Computing, Cloud computing platforms and infrastructure, Parallel programming in the Cloud, Distributed storage systems, Virtualization, Cloud security, Cloud performance."
+    },
+    {
+      "code": "02-24-00205",
+      "name": "تعلم الآلة (Machine Learning)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00109"
+      ],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب كلية إجباري (College Mandatory)",
+      "level": 2,
+      "description": "Feature representation, Similarity, Dimensionality reduction, Supervised learning, Regression, Unsupervised learning, Evaluation, Fundamentals of neural networks (Feedforward and Backpropagation), Reinforcement learning, Applications."
+    },
+    {
+      "code": "02-24-00206",
+      "name": "تنقيب وتحليل البيانات (Data Mining and Analytics)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00201"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب كلية إجباري (College Mandatory)",
+      "level": 2,
+      "description": "Introduction to data mining, Data exploration and visualization, Data preprocessing, Classification: concepts, basic techniques and evaluation, advanced methods (support vector machines and Bayesian networks), Mining frequent patterns and associations: concepts, techniques and evaluation, Clustering: concepts, techniques, and evaluation, Selected advanced topics (text mining), Current trends in data mining."
+    },
+    {
+      "code": "02-24-00301",
+      "name": "هندسة البرمجيات (Software Engineering)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00110"
+      ],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب كلية اختياري (College Elective)",
+      "level": 3,
+      "description": "Concepts of software development, Software life cycle and process models, Software project management, Software tools and environments, Requirements engineering, Data and process modeling, Software design techniques, Software coding, Software verification and validation, Software evolution, Software reliability, Formal methods."
+    },
+    {
+      "code": "02-24-00302",
+      "name": "تحليل وتصميم النظم (Systems Analysis and Design)",
+      "credit_hours": 3,
+      "prerequisites": [],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب كلية اختياري (College Elective)",
+      "level": 3,
+      "description": "Introduction to systems analysis and design, Analysis and design tools, Advanced systems design concepts, Case studies and practical projects, Current trends in systems development."
+    },
+    {
+      "code": "02-24-00303",
+      "name": "تصميم الخوارزميات (Algorithm Design)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00108"
+      ],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب كلية اختياري (College Elective)",
+      "level": 3,
+      "description": "Asymptotic notations, Solving recursive relations, Basic analysis measures: Worst and average-case complexity bounds, Amortized analysis, Randomization, Fundamental design strategies: Divide-and-conquer, Dynamic programming, and Greedy methods, String algorithms, Geometric algorithms, Number-theoretic algorithms, Complexity classes, NP-complete problems, Approximation algorithms."
+    },
+    {
+      "code": "02-24-00304",
+      "name": "المعالجة الموزعة (Distributed Processing)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00103",
+        "02-24-00108"
+      ],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب كلية اختياري (College Elective)",
+      "level": 3,
+      "description": "Parallel and distributed systems architecture models, Distributed communication and message passing (Case Studies: sockets, RPC, RMI, MPI), Distributed naming, Distributed file systems, Distributed synchronization, Fault tolerance and recovery protocols, Consistency models, Relaxed consistency, Distributed agreement, Web services."
+    },
+    {
+      "code": "02-24-00305",
+      "name": "برمجة تطبيقات الأجهزة المحمولة (Mobile Programming)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00105"
+      ],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب كلية اختياري (College Elective)",
+      "level": 3,
+      "description": "Mobile application development frameworks, Design techniques, Methodologies for mobile application development, Android development w/ Java, iOS development w/ Swift, Using Native React, RESTful and Non-RESTful apps, Creating Web/Cloud services, Mobile sensors, Security and trust management, Privacy and ethics, Usability."
+    },
+    {
+      "code": "02-24-00306",
+      "name": "برمجة الويب (Web Programming)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00105"
+      ],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب كلية اختياري (College Elective)",
+      "level": 3,
+      "description": "Web fundamentals, Programming Languages for the Web, HTML Basics, Using HTML, Using CSS and templates, Basics of JavaScript, Programming with JavaScript, Introduction to front end programming, PHP, Django, AngularJS, React, responsive web design, Full stack state management, Security pitfalls and basic solutions."
+    },
+    {
+      "code": "02-24-00307",
+      "name": "نظم التشغيل (Operating Systems)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00103",
+        "02-24-00105"
+      ],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب كلية اختياري (College Elective)",
+      "level": 3,
+      "description": "Overview of operating systems, Operating systems principles and structure, Processes and threads, Synchronization, Scheduling, Memory management and virtual memory, I/O device management, File systems, Virtual machines, System performance evaluation, Security and protection, Distributed operating systems, Case studies, Recent trends in operating systems."
+    },
+    {
+      "code": "02-24-00308",
+      "name": "شبكات الحاسب (Computer Networks)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00103",
+        "02-24-00105"
+      ],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب كلية اختياري (College Elective)",
+      "level": 3,
+      "description": "Introduction to network architecture, layering, and protocols, Principles of network applications and application layer protocols examples, Socket programming, Introduction to transport layer protocols: Principles of reliable data delivery, TCP protocol, Introduction to the network layer: Network layer addressing, Routing and forwarding, Principles of routing algorithms."
+    },
+    {
+      "code": "02-24-01201",
+      "name": "تفاضل وتكامل متقدم (Advanced Calculus)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00102"
+      ],
+      "department": "العلوم الأساسية (Basic Sciences)",
+      "category": "متطلب برنامج إجباري (Program Mandatory)",
+      "level": 2,
+      "description": "Sequences, Series, Absolute and conditional convergence, Tests of convergence, Power series and interval of convergence, Taylor's series, Differentiation and integration of power series, Vector algebra in R2 and R3, Dot product and cross product, Functions of several variables, Limits and continuity, Partial derivatives, Total differentials, Directional derivatives, Gradients of functions, Mean value theorem, Lagrange's multiplier method, Multiple integrals, Iterated integrals, Change of order of integration, Change of variable formula for multiple integrals."
+    },
+    {
+      "code": "02-24-01202",
+      "name": "منهجية علوم البيانات (Data Science Methodology)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00104"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج إجباري (Program Mandatory)",
+      "level": 2,
+      "description": "The data science framework, Business understanding, RFM modelling, Data collection and preparation, Structured and unstructured data, Cleaning and Exploration, Data visualization, Market basket analysis, Modeling, Evaluation, Feedback, Use cases."
+    },
+    {
+      "code": "02-24-01203",
+      "name": "أدوات وبرمجيات علوم البيانات (Data Science Tools and Software)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00105",
+        "02-24-00201",
+        "02-24-01202"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج إجباري (Program Mandatory)",
+      "level": 2,
+      "description": "Practical data handling and statistical tools, Applications using Python and R, Predictive data analysis software as SAS and Apache Spark, Other data analytics software tools, Use cases in Finance, Media, and Health."
+    },
+    {
+      "code": "02-24-01204",
+      "name": "تحليل الانحدار (Regression Analysis)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00201"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج إجباري (Program Mandatory)",
+      "level": 2,
+      "description": "Simple linear regression, Multiple regression, Model building and regression diagnostics, One and two factor analysis of variance, Analysis of covariance, Linear model as special case of generalized linear model."
+    },
+    {
+      "code": "02-24-01205",
+      "name": "تدريب ميداني 1 (Field Training I)",
+      "credit_hours": 2,
+      "prerequisites": [],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج إجباري (Program Mandatory)",
+      "level": 2,
+      "description": "تدريب عملي ميداني في إحدى الشركات أو المؤسسات المتخصصة لتطبيق المهارات البرمجية والتحليلية في بيئة عمل حقيقية (فصل الصيف للمستوى الثاني)."
+    },
+    {
+      "code": "02-24-01301",
+      "name": "العمليات العشوائية (Stochastic Processes)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00101",
+        "02-24-00201"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج إجباري (Program Mandatory)",
+      "level": 3,
+      "description": "Discrete-time Markov chains, Classification of states, Irreducibility, Periodicity, First passage times, Recurrence and transience, Convergence theorems and stationary distributions, Poisson process, Point process, Continuous time Markov chain, Birth and death processes, Martingale, Queuing models, Queuing theory."
+    },
+    {
+      "code": "02-24-01302",
+      "name": "تصميم وتحليل التجارب (Design and Analysis of Experiments)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00201"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج إجباري (Program Mandatory)",
+      "level": 3,
+      "description": "Basic experimental designs, Analysis of one-way and two-way layout data, Multiple comparisons, Factorial designs, 2k-factorial designs, Blocking and confounding, Fractional factorial design and nested designs, Representation of results."
+    },
+    {
+      "code": "02-24-01303",
+      "name": "أدوات تصور البيانات (Data Visualization Tools)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-01202",
+        "02-24-01203"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج إجباري (Program Mandatory)",
+      "level": 3,
+      "description": "Introduction to Information visualization, Visualization tools, Design approaches for visualization, Statistical graphics for univariate, multivariate, temporal and spatial data, Basic design principles and critical evaluation of visual displays of data, Viewing transformations, Projections, Rendering techniques, Graphical software packages."
+    },
+    {
+      "code": "02-24-01304",
+      "name": "حوسبة وتحليل البيانات (Data Computation and Analysis)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00205",
+        "02-24-00206"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج إجباري (Program Mandatory)",
+      "level": 3,
+      "description": "Data storage platforms, Data manipulation, Data cleaning, Data analysis, Dimensionality reduction, Numerical methods for machine learning models, Cluster analysis, Principal component analysis, Kernel methods for pattern analysis, Sparse coding and dictionary learning, Recommendation systems."
+    },
+    {
+      "code": "02-24-01305",
+      "name": "منهجية المسوح (Survey Methodology)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00201"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج إجباري (Program Mandatory)",
+      "level": 3,
+      "description": "Planning of surveys, Questionnaire construction, Methods of data collection, Fieldwork procedures, Sources of errors, Basic ideas of sampling, Simple random sampling, Stratified, systematic, replicated, cluster and quota sampling, Sample size determination and cost."
+    },
+    {
+      "code": "02-24-01306",
+      "name": "طرق إحصائية حاسوبية مكثفة (Computing Intensive Statistical Methods)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00201"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج إجباري (Program Mandatory)",
+      "level": 3,
+      "description": "Empirical distribution, Estimation of population distribution, General algorithm of bootstrap method, Bootstrap estimates of standard deviation and bias, Jack-knife method, Bootstrap confidence intervals, Empirical likelihood for the mean and parameters, Wilks theorem, EM algorithm."
+    },
+    {
+      "code": "02-24-01307",
+      "name": "تدريب ميداني 2 (Field Training II)",
+      "credit_hours": 2,
+      "prerequisites": [],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج إجباري (Program Mandatory)",
+      "level": 3,
+      "description": "تدريب عملي متقدم في مشاريع تحليل البيانات وتطبيقات الذكاء الاصطناعي (فصل الصيف للمستوى الثالث)."
+    },
+    {
+      "code": "02-24-01401",
+      "name": "تحليلات البيانات الضخمة (Big Data Analytics)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00105",
+        "02-24-00205",
+        "02-24-00206"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج إجباري (Program Mandatory)",
+      "level": 4,
+      "description": "Basics of big data, Big data issues, Big data processing, Streaming big data, Web and social networks data, Classification of big data, Clustering of big data, Modeling big data, Predicting using models, Scaling traditional techniques, Use cases."
+    },
+    {
+      "code": "02-24-01402",
+      "name": "مقدمة في الشبكات الاجتماعية (Introduction to Social Networks)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00201"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج إجباري (Program Mandatory)",
+      "level": 4,
+      "description": "Introduction to online social networks computing, Theoretical foundation, Mathematical aspects, and applications of social computing, Impact of social networks, Evolution of social networks, Social influence analysis, Link prediction and analysis."
+    },
+    {
+      "code": "02-24-01403",
+      "name": "المحاكاة (Simulations)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00105",
+        "02-24-00106"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج إجباري (Program Mandatory)",
+      "level": 4,
+      "description": "Pseudorandom number generation, Generating discrete and continuous random variables, Simulating discrete events, Statistical analysis of simulated data, Variance reduction, Markov Chain Monte Carlo methods, Selected topics in stochastic optimization."
+    },
+    {
+      "code": "02-24-01404",
+      "name": "مشروع تخرج 1 (Project I)",
+      "credit_hours": 3,
+      "prerequisites": [],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج إجباري (Program Mandatory)",
+      "level": 4,
+      "description": "An opportunity for the student to become closely associated with a professor in a research effort to develop research skills and technique and/or to develop a program of independent in depth study in a subject area in which the professor and the student have a common interest."
+    },
+    {
+      "code": "02-24-01405",
+      "name": "تحليلات البيانات الاجتماعية (Social Data Analytics)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00101",
+        "02-24-00201",
+        "02-24-00205",
+        "02-24-01402"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج إجباري (Program Mandatory)",
+      "level": 4,
+      "description": "Social data analysis, Influence and centrality in social media, Information diffusion on networks, Topic modeling and sentiment analysis, Identifying social bots, and predicting behavior, Network analysis, Statistical methods for social data analytics, AI techniques for social data analytics."
+    },
+    {
+      "code": "02-24-01406",
+      "name": "تحليل البيانات الموزعة (Distributed Data Analysis)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00202",
+        "02-24-00204",
+        "02-24-00206"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج إجباري (Program Mandatory)",
+      "level": 4,
+      "description": "Introduction to distributed processing, Parallel computing, Distributed processing platforms, Data analysis using distributed processing platforms, Data mining algorithms in parallel, Case studies using parallel R or similar tools."
+    },
+    {
+      "code": "02-24-01407",
+      "name": "معالجة التدفقات (Stream Processing)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00101",
+        "02-24-00105",
+        "02-24-01201"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج إجباري (Program Mandatory)",
+      "level": 4,
+      "description": "Dealing with big data online, Data streaming, Implications and impacts, Streaming applications, Stream processing frameworks, Stream processing algorithms, Streaming SQL languages, Analytics while streaming."
+    },
+    {
+      "code": "02-24-01408",
+      "name": "مشروع تخرج 2 (Project II)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-01404"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج إجباري (Program Mandatory)",
+      "level": 4,
+      "description": "The students continue the study and implementation of the capstone graduation project performed in the first semester."
+    },
+    {
+      "code": "02-24-01409",
+      "name": "التحسين المحدب (Convex Optimization)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00101",
+        "02-24-00203",
+        "02-24-01201"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج اختياري (Program Elective)",
+      "level": 4,
+      "description": "Introduction to convex optimization, Basic concepts for convex functions and sub-gradients, Gradient and sub-gradient methods, Accelerated proximal gradient methods, Stochastic block coordinate descent methods, Lagrangian duals, Splitting algorithms and implementations."
+    },
+    {
+      "code": "02-24-01410",
+      "name": "التحسين غير الخطي والتوافقي (Non-Linear and Combinatorial Optimization)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00101",
+        "02-24-00108"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج اختياري (Program Elective)",
+      "level": 4,
+      "description": "Optimization techniques for constrained unidimensional and multidimensional problems, Analysis techniques, Matching, Unimodular matrices, Matroids, Polyhedral aspects, Max-flows and min-cuts, Multicommodity flows, Heuristic techniques for hard optimization problems."
+    },
+    {
+      "code": "02-24-01411",
+      "name": "التحليل الإحصائي متعدد المتغيرات (Multivariate Statistical Analysis)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00201"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج اختياري (Program Elective)",
+      "level": 4,
+      "description": "Distribution theory, Multivariate normal distribution, Hotelling's T2 and Wishart distributions, Inference on the mean and covariance, Principal components and canonical correlation, Factor analysis, Discrimination and classification."
+    },
+    {
+      "code": "02-24-01412",
+      "name": "الإحصاء البيزي (Bayesian Statistics)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00201"
+      ],
+      "department": "علوم وتحليلات البيانات (Data Sciences & Analytics)",
+      "category": "متطلب برنامج اختياري (Program Elective)",
+      "level": 4,
+      "description": "Bayes' theorem, estimation, hypothesis testing, prior distributions, likelihood, predictive distributions. Bayesian computation: numerical approximation, posterior simulation and integration, Markov chain simulation, models and applications: hierarchical linear models, generalized linear models, multivariate models, mixture models, models for missing data."
+    },
+    {
+      "code": "02-24-01413",
+      "name": "تقنيات ضغط البيانات (Data Compression Techniques)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00108"
+      ],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب برنامج اختياري (Program Elective)",
+      "level": 4,
+      "description": "Basics of information theory, Basic data compression techniques, Lossless and lossy compression, Huffman coding, LZW coding, Entropy coding, Text compression, Video and audio compression, Succinct data structures, Applications to the compression of real data sets (DNA sequences, biological time series, multimedia streams)."
+    },
+    {
+      "code": "02-24-01414",
+      "name": "الخوارزميات وهياكل البيانات التزامنية (Concurrent Algorithms and Data Structures)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00108"
+      ],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب برنامج اختياري (Program Elective)",
+      "level": 4,
+      "description": "Mutual exclusion, Correctness conditions for concurrent datatypes, Foundations of shared memory, Synchronization methods, Implementing locks and monitors, Implementing concurrent datatypes, such as: linked lists, queues, counting and sorting networks, hash tables and skip lists."
+    },
+    {
+      "code": "02-24-01415",
+      "name": "نظم قواعد البيانات الموزعة (Distributed Database Systems)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00202"
+      ],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب برنامج اختياري (Program Elective)",
+      "level": 4,
+      "description": "Distributed database architectures, Distributed data storage and indexing, Distributed and parallel query processing/optimization, Distributed transaction management, Concurrency control in distributed database systems."
+    },
+    {
+      "code": "02-24-01416",
+      "name": "نظم قواعد البيانات المتقدمة (Advanced Database Systems)",
+      "credit_hours": 3,
+      "prerequisites": [
+        "02-24-00202"
+      ],
+      "department": "نظم الحوسبة والمعلومات (Computing & Information Systems)",
+      "category": "متطلب برنامج اختياري (Program Elective)",
+      "level": 4,
+      "description": "Transaction handling, Advanced and embedded SQL, Triggers and stored procedures, Client and server side applications, Efficient storing, accessing, securing and recovering of data, Advanced structures in relational, hybrid, and object oriented databases."
+    },
+    {
+      "code": "POM100",
+      "name": "مبادئ الإدارة (Principles of Management)",
+      "credit_hours": 2,
+      "prerequisites": [],
+      "department": "متطلبات الجامعة الاختيارية",
+      "category": "متطلب جامعة اختياري (University Elective)",
+      "level": 2,
+      "description": "المفاهيم والوظائف الإدارية الأساسية: التخطيط، التنظيم، القيادة، والرقابة."
+    },
+    {
+      "code": "MATH000",
+      "name": "رياضيات 0 التأهيلية (Math0)",
+      "credit_hours": 0,
+      "prerequisites": [],
+      "department": "العلوم الأساسية",
+      "category": "مقرر تأهيلي (Remedial)",
+      "level": 1,
+      "description": "مقرر تأهيلي في الجبر وحساب المثلثات والهندسة المستوية للطلاب المستجدين."
+    },
+    {
+      "code": "FEPS101",
+      "name": "العلوم الاقتصادية (Economic Sciences)",
+      "credit_hours": 2,
+      "prerequisites": [],
+      "department": "متطلبات الجامعة الاختيارية",
+      "category": "متطلب جامعة اختياري (University Elective)",
+      "level": 1,
+      "description": "مفاهيم الاقتصاد الجزئي والكلي ونظريات العرض والطلب والأسواق."
+    },
+    {
+      "code": "FIT101",
+      "name": "لياقة بدنية وصحية (Fitness & Health)",
+      "credit_hours": 2,
+      "prerequisites": [],
+      "department": "متطلبات الجامعة الاختيارية",
+      "category": "متطلب جامعة اختياري (University Elective)",
+      "level": 1,
+      "description": "أسس التربية البدنية واللياقة وصحة الجسم والتغذية السليمة."
+    }
+  ]
+}
