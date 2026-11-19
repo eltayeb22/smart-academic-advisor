@@ -87,7 +87,7 @@ smart-academic-advisor/
 │   ├── college_bylaws.txt            # Extracted credit-hour academic regulations
 │   ├── course_catalog.json           # Full curriculum catalog & prerequisite tree
 │   ├── courses.json                  # Structured course definitions
-│   └── student_record.example.json   # Sample anonymized student transcript (safe for demo)
+│   └── student_record.example.json   # Clean empty starter transcript template
 └── utils/
     ├── __init__.py
     ├── pdf_loader.py                 # PDF text extraction & chunking utilities
@@ -143,13 +143,13 @@ cp .env.example .env
 ```
 *(You can also enter your API key directly from the Streamlit sidebar at runtime.)*
 
-### 4. (Optional) Use Your Own Academic Transcript
-By default, the app loads the anonymized sample file `data/student_record.example.json`.  
-To use your own transcript privately (kept out of Git via `.gitignore`):
-```bash
-cp data/student_record.example.json data/student_record.json
-```
-Then edit your details directly in the JSON file or interactively inside the Streamlit dashboard.
+### 4. Add Your Academic Transcript
+The app starts with a clean empty transcript table by default. Open the **Transcript** tab inside Streamlit to:
+- Add courses directly from the college catalog dropdown or inline table editor
+- Copy-paste your transcript table directly from your university SIS portal
+- Upload a CSV/JSON file or extract courses from a transcript PDF/image via Gemini
+
+All saved changes are stored privately in `data/student_record.json` (gitignored by default).
 
 ### 5. Run the Application
 ```bash
@@ -166,4 +166,4 @@ python test_core.py
 ## Privacy & Security
 
 - **API Secrets**: `.env` is excluded via `.gitignore` and never committed.
-- **Personal Academic Records**: `data/student_record.json` is excluded via `.gitignore`. Only the fictional demo file (`data/student_record.example.json`) is tracked in this public repository.
+- **Personal Academic Records**: `data/student_record.json` is excluded via `.gitignore`. Only the empty starter template (`data/student_record.example.json`) is tracked in this public repository.

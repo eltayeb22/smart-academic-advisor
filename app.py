@@ -171,14 +171,17 @@ with st.sidebar:
 
 # ----------------- Main Layout Tabs -----------------
 st.title("🎓 Smart Academic Advisor | المرشد الأكاديمي الذكي")
-st.markdown(f"**مرحباً بك يا {student.student_name}** | الرقم الجامعي: `{student.student_id}` | التخصص: `{student.major}` | المستوى: `{student.academic_level}`")
+display_sid = student.student_id if student.student_id else "غير محدد"
+st.markdown(f"**مرحباً بك يا {student.student_name}** | الرقم الجامعي: `{display_sid}` | التخصص: `{student.major}` | المستوى: `{student.academic_level}`")
 
 # Overview KPI Cards
+has_completed = len(student.completed_courses) > 0
 col1, col2, col3, col4 = st.columns(4)
 with col1:
+    gpa_display = f"{student.current_gpa:.4f}" if has_completed else "—"
     st.markdown(f"""
     <div class="metric-card">
-        <div class="metric-value">{student.current_gpa:.4f}</div>
+        <div class="metric-value">{gpa_display}</div>
         <div class="metric-label">المعدل التراكمي الحالي (CGPA)</div>
     </div>
     """, unsafe_allow_html=True)
@@ -194,13 +197,21 @@ with col2:
 with col3:
     failed_courses = student.get_failed_course_codes()
     has_f = len(failed_courses) > 0
-    standing_color = "#f43f5e" if has_f else "#10b981"
+    if not has_completed:
+        standing_color = "#38bdf8"
+        standing_label = "سجل فارغ (أضف موادك)"
+    elif has_f:
+        standing_color = "#f43f5e"
+        standing_label = f"رسوب نشط ({len(failed_courses)} مواد)"
+    else:
+        standing_color = "#10b981"
+        standing_label = "سجل منتظم"
     st.markdown(f"""
     <div class="metric-card">
         <div class="metric-value" style="color: {standing_color}; font-size: 1.4rem; padding-top: 0.4rem;">
-            {f"رسوب نشط ({len(failed_courses)} مواد)" if has_f else "سجل منتظم"}
+            {standing_label}
         </div>
-        <div class="metric-label">حالة الرسوب الحالية</div>
+        <div class="metric-label">الحالة الأكاديمية</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -209,7 +220,7 @@ with col4:
     st.markdown(f"""
     <div class="metric-card">
         <div class="metric-value">{reg_credits} ساعة</div>
-        <div class="metric-label">ساعات مسجلة (Fall 2026/2027)</div>
+        <div class="metric-label">ساعات الفصل المسجلة</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -233,8 +244,8 @@ with tab_chat:
         prompt_to_send = "ما هي المقررات التي تنصحني بتسجيلها في الفصل القادم بناءً على المتطلبات السابقة وموقفي الأكاديمي في اللائحة؟"
     if q_col2.button("⚠️ ما موقفي من مرتبة الشرف؟", use_container_width=True):
         prompt_to_send = "هل أنا مؤهل للحصول على مرتبة الشرف عند التخرج وفقاً للائحة الكلية وسجلي الحالي؟"
-    if q_col3.button("🧮 احسب معدلي لو أعدت OS وجبت A", use_container_width=True):
-        prompt_to_send = "لو أعدت مادة نظم التشغيل (02-24-00307) وحصلت فيها على A، وسجلت معها 4 مواد جديدة 12 ساعة وحصلت على B+، كم سيصبح معدلي التراكمي بدقة؟"
+    if q_col3.button("🧮 احسب معدلي المتوقع للفصل القادم", use_container_width=True):
+        prompt_to_send = "لو سجلت 5 مواد جديدة بواقع 15 ساعة وحصلت على B+ في 3 مواد و A في مادتين، كم سيصبح معدلي التراكمي بدقة؟"
     if q_col4.button("📜 ما هي شروط الإنذار والعبء؟", use_container_width=True):
         prompt_to_send = "ما هي قواعد الإنذار الأكاديمي والحد الأقصى للساعات المسموح بها في لائحة الكلية؟"
 
@@ -438,7 +449,7 @@ with tab_transcript:
                 )
 
     # --- 2. Quick Add Course from Catalog ---
-    with st.expander("➕ إضافة مقرر جديد بسرعة من دليل الكلية", expanded=False):
+    with st.expander("➕ إضافة مقرر جديد بسرعة من دليل الكلية", expanded=(len(student.completed_courses) == 0)):
         catalog_options = [f"{c.code} | {c.name} ({c.credit_hours} س)" for c in catalog.courses]
         catalog_options.append("مقرر مخصص (إدخال يدوي)")
         selected_cat_opt = st.selectbox("اختر المقرر:", options=catalog_options, key="quick_add_course_select")
@@ -511,9 +522,15 @@ with tab_transcript:
             "الحالة": "✅ ناجح" if c.passed else "❌ راسب (F)"
         })
 
-    df_transcript = pd.DataFrame(courses_data) if courses_data else pd.DataFrame(
-        columns=["رمز المقرر", "اسم المقرر", "الساعات", "الفصل الدراسي", "التقدير", "النقاط", "الحالة"]
-    )
+    df_transcript = pd.DataFrame(courses_data) if courses_data else pd.DataFrame({
+        "رمز المقرر": pd.Series(dtype="str"),
+        "اسم المقرر": pd.Series(dtype="str"),
+        "الساعات": pd.Series(dtype="int"),
+        "الفصل الدراسي": pd.Series(dtype="str"),
+        "التقدير": pd.Series(dtype="str"),
+        "النقاط": pd.Series(dtype="float"),
+        "الحالة": pd.Series(dtype="str"),
+    })
 
     edited_df = st.data_editor(
         df_transcript,
@@ -532,31 +549,42 @@ with tab_transcript:
         }
     )
 
-    if st.button("💾 حفظ التعديلات وإعادة حساب النقاط والـ GPA فوراً", type="primary", use_container_width=True):
-        updated_courses = []
-        for _, row in edited_df.iterrows():
-            code = str(row.get("رمز المقرر", "") or "").strip()
-            if not code:
-                continue
-            title = str(row.get("اسم المقرر", "") or "").strip() or code
-            hrs = int(row["الساعات"]) if pd.notna(row.get("الساعات")) else 3
-            sem = str(row.get("الفصل الدراسي", "") or "Unknown").strip()
-            grade = str(row.get("التقدير", "F") or "F").strip()
-            updated_courses.append(
-                CourseRecord(
-                    course_code=code,
-                    course_title=title,
-                    credit_hours=hrs,
-                    grade=grade,
-                    semester=sem,
+    save_col, reset_col = st.columns([3, 1])
+    with save_col:
+        if st.button("💾 حفظ التعديلات وإعادة حساب النقاط والـ GPA فوراً", type="primary", use_container_width=True):
+            updated_courses = []
+            for _, row in edited_df.iterrows():
+                code = str(row.get("رمز المقرر", "") or "").strip()
+                if not code:
+                    continue
+                title = str(row.get("اسم المقرر", "") or "").strip() or code
+                hrs = int(row["الساعات"]) if pd.notna(row.get("الساعات")) else 3
+                sem = str(row.get("الفصل الدراسي", "") or "Unknown").strip()
+                grade = str(row.get("التقدير", "F") or "F").strip()
+                updated_courses.append(
+                    CourseRecord(
+                        course_code=code,
+                        course_title=title,
+                        credit_hours=hrs,
+                        grade=grade,
+                        semester=sem,
+                    )
                 )
-            )
 
-        student.completed_courses = updated_courses
-        student.recalculate_academic_metrics()
-        save_student_record(student, LOCAL_STUDENT_RECORD_PATH)
-        st.success(f"✅ تم تحديث السجل بنجاح! الساعات المنجزة: {student.total_completed_credits} | النقاط الإجمالية: {student.total_quality_points:.3f} | الـ GPA الجديد: {student.current_gpa:.4f}")
-        st.rerun()
+            student.completed_courses = updated_courses
+            student.recalculate_academic_metrics()
+            save_student_record(student, LOCAL_STUDENT_RECORD_PATH)
+            st.success(f"✅ تم تحديث السجل بنجاح! الساعات المنجزة: {student.total_completed_credits} | النقاط الإجمالية: {student.total_quality_points:.3f} | الـ GPA الجديد: {student.current_gpa:.4f}")
+            st.rerun()
+
+    with reset_col:
+        if st.button("🗑️ تفريغ الجدول", use_container_width=True, help="مسح كل المواد والبدء بجدول فارغ"):
+            student.completed_courses = []
+            student.registered_courses = []
+            student.recalculate_academic_metrics()
+            save_student_record(student, LOCAL_STUDENT_RECORD_PATH)
+            st.success("تم تفريغ الجدول بنجاح.")
+            st.rerun()
 
     failed_courses = student.get_failed_course_codes()
     if failed_courses:
@@ -576,9 +604,13 @@ with tab_transcript:
         }
         for r in student.registered_courses
     ]
-    df_reg = pd.DataFrame(reg_data) if reg_data else pd.DataFrame(
-        columns=["رمز المقرر", "اسم المقرر", "الساعات", "الفصل الدراسي", "الحالة"]
-    )
+    df_reg = pd.DataFrame(reg_data) if reg_data else pd.DataFrame({
+        "رمز المقرر": pd.Series(dtype="str"),
+        "اسم المقرر": pd.Series(dtype="str"),
+        "الساعات": pd.Series(dtype="int"),
+        "الفصل الدراسي": pd.Series(dtype="str"),
+        "الحالة": pd.Series(dtype="str"),
+    })
     edited_reg_df = st.data_editor(
         df_reg,
         use_container_width=True,
@@ -648,7 +680,11 @@ with tab_transcript:
 # ----------------- TAB 3: What-If GPA Simulator -----------------
 with tab_simulator:
     st.subheader("🧮 محاكي المعدل التراكمي الفوري (Deterministic What-If Simulator)")
-    st.write("تم تحميل المواد الـ 6 المسجلة للفصل الحالي (Fall 2026/2027) تلقائياً. اختر تقديراتك المتوقعة لمعرفة المعدل الناتج بدقة رقمية.")
+    sim_reg_credits = sum(r.credit_hours for r in student.registered_courses)
+    if student.registered_courses:
+        st.write(f"تم تحميل المقررات المسجلة حالياً ({len(student.registered_courses)} مقررات — {sim_reg_credits} ساعة) تلقائياً. اختر تقديراتك المتوقعة لمعرفة المعدل الناتج بدقة رقمية.")
+    else:
+        st.write("اختر عدد المقررات وساعاتها وتقديراتك المتوقعة لمحاكاة معدلك الفصلي والتراكمي بدقة رقمية (أو أضف مواد الفصل الحالي من تبويب السجل الأكاديمي لتظهر هنا تلقائياً).")
 
     sim_col1, sim_col2 = st.columns([1, 2])
 
@@ -674,9 +710,9 @@ with tab_simulator:
             st.info("لا توجد مقررات مسجل فيها رسوب نشط.")
 
     with sim_col2:
-        st.markdown("#### 2. تقديرات المواد المسجلة للفصل الحالي (Fall 2026/2027 - 17 ساعة)")
         sim_new_courses = []
         if student.registered_courses:
+            st.markdown(f"#### 2. تقديرات المقررات المسجلة للفصل الحالي ({sim_reg_credits} ساعة)")
             for i, reg in enumerate(student.registered_courses):
                 c_col_name, c_col_hr, c_col_gr = st.columns([3, 1, 1.2])
                 with c_col_name:
@@ -688,6 +724,22 @@ with tab_simulator:
                 sim_new_courses.append({
                     "course_code": reg.course_code,
                     "credit_hours": reg.credit_hours,
+                    "expected_grade": c_gr
+                })
+        else:
+            st.markdown("#### 2. محاكاة مقررات جديدة للفصل الدراسي")
+            num_sim = st.number_input("عدد المقررات للمحاكاة:", min_value=1, max_value=8, value=5, step=1, key="num_sim_courses")
+            for i in range(int(num_sim)):
+                c_col_name, c_col_hr, c_col_gr = st.columns([2.5, 1, 1.2])
+                with c_col_name:
+                    c_lbl = st.text_input("المقرر:", value=f"Course {i + 1}", key=f"sim_new_lbl_{i}")
+                with c_col_hr:
+                    c_hr = st.number_input("الساعات:", min_value=1, max_value=6, value=3, step=1, key=f"sim_new_hr_{i}")
+                with c_col_gr:
+                    c_gr = st.selectbox("التقدير المتوقع:", ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "F"], index=3, key=f"sim_new_gr_{i}")
+                sim_new_courses.append({
+                    "course_code": c_lbl,
+                    "credit_hours": int(c_hr),
                     "expected_grade": c_gr
                 })
 

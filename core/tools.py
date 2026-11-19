@@ -249,12 +249,18 @@ def analyze_academic_standing() -> Dict[str, Any]:
     student = _get_active_student()
     gpa = student.current_gpa
     completed_credits = student.total_completed_credits
+    has_any_courses = len(student.completed_courses) > 0
 
-    is_probation = gpa < PROBATION_GPA_THRESHOLD
+    is_probation = has_any_courses and (gpa < PROBATION_GPA_THRESHOLD)
     has_f_grades = len(student.get_failed_course_codes()) > 0
 
     # Determine credit limits based on college bylaws
-    if is_probation:
+    if not has_any_courses:
+        max_credits = NORMAL_MAX_CREDIT_HOURS
+        min_credits = MIN_CREDIT_HOURS_PER_SEMESTER
+        standing_desc = "طالب مستجد / سجل جديد (لا توجد درجات مسجلة بعد)"
+        guidance = "ابدأ بإضافة مقرراتك المنجزة أو المسجلة من تبويب (السجل الأكاديمي) ليتم حساب معدلك واقتراح خطتك بدقة."
+    elif is_probation:
         max_credits = PROBATION_MAX_CREDIT_HOURS
         min_credits = MIN_CREDIT_HOURS_PER_SEMESTER
         standing_desc = "تحت الإنذار الأكاديمي (Academic Probation) - المعدل أقل من 2.00"
@@ -270,12 +276,16 @@ def analyze_academic_standing() -> Dict[str, Any]:
         standing_desc = "حالة أكاديمية جيدة (Good Standing)"
         guidance = "العبء الدراسي المعتاد هو من 12 إلى 18 ساعة معتمدة."
 
-    # Honors eligibility: GPA >= 3.50 and NO F grades throughout academic history
-    honors_eligible = (gpa >= 3.50) and (not has_f_grades)
-    honors_reason = "مؤهل لمرتبة الشرف" if honors_eligible else (
-        "غير مؤهل لمرتبة الشرف بسبب وجود رسوب سابق (درجة F)" if has_f_grades
-        else "المعدل الحالي أقل من 3.50 المشترط لمرتبة الشرف"
-    )
+    # Honors eligibility: GPA >= 3.50 (or new student with no grades yet) and NO F grades
+    if not has_any_courses:
+        honors_eligible = True
+        honors_reason = "لم يتم إدخال درجات بعد؛ حافظ على معدل 3.666 فأكثر دون رسوب للتأهل لمرتبة الشرف"
+    else:
+        honors_eligible = (gpa >= 3.50) and (not has_f_grades)
+        honors_reason = "مؤهل لمرتبة الشرف" if honors_eligible else (
+            "غير مؤهل لمرتبة الشرف بسبب وجود رسوب سابق (درجة F)" if has_f_grades
+            else "المعدل الحالي أقل من 3.50 المشترط لمرتبة الشرف"
+        )
 
     remaining_credits = max(0, TOTAL_GRADUATION_CREDITS - completed_credits)
     progress_percentage = round((completed_credits / TOTAL_GRADUATION_CREDITS) * 100, 1)
