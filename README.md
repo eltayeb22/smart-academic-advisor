@@ -22,7 +22,7 @@ It combines **Retrieval-Augmented Generation (RAG)** over official university cr
 - **Automated Grading Scale Engine (`config.py`, `utils/transcript_parser.py`)**: Automatically computes course quality points, pass/fail status, course-repetition replacement rules, and cumulative GPA strictly according to the official 4.0 grading scale.
 - **Interactive 4-Tab Streamlit Dashboard (`app.py`)**:
   1. **AI Advisor Chat**: Conversational advisor with quick-prompt shortcuts and tool-backed answers.
-  2. **Editable Transcript (`st.data_editor`)**: Inline editing of course grades, credit hours, and semesters with automatic GPA recalculation.
+  2. **Transcript Manager & Importer (`st.data_editor`, `utils/transcript_importer.py`)**: Supports uploading CSV/JSON transcripts, copy-pasting tables directly from university SIS portals, AI-assisted extraction from transcript PDFs/images, adding courses from the catalog, inline add/edit/delete of completed and registered courses, and one-click semester completion with automatic GPA recalculation.
   3. **What-If GPA Simulator**: Pre-populated with currently registered semester courses and active failed courses for instant scenario modeling.
   4. **Course Catalog & Prerequisites**: Searchable curriculum explorer with prerequisite chains.
 
@@ -91,6 +91,7 @@ smart-academic-advisor/
 └── utils/
     ├── __init__.py
     ├── pdf_loader.py                 # PDF text extraction & chunking utilities
+    ├── transcript_importer.py        # CSV/JSON import-export, SIS paste parser & Gemini OCR
     └── transcript_parser.py          # Pydantic schemas & automated GPA calculations
 ```
 

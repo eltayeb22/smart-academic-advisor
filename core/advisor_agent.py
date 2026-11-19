@@ -1,7 +1,7 @@
 import os
 import time
 from typing import List, Dict, Any, Optional
-from config import DEFAULT_MODEL, FALLBACK_MODEL, GEMINI_API_KEY, STUDENT_RECORD_PATH
+from config import DEFAULT_MODEL, FALLBACK_MODEL, GEMINI_API_KEY, get_student_record_path
 from utils.transcript_parser import load_student_record
 from core.tools import (
     calculate_projected_gpa,
@@ -13,7 +13,7 @@ from core.rag_engine import search_college_bylaws
 def build_advisor_system_instruction() -> str:
     """Builds a contextualized, compact system instruction with live student data."""
     try:
-        student = load_student_record(STUDENT_RECORD_PATH)
+        student = load_student_record(get_student_record_path())
         reg_courses_str = ", ".join([f"{c.course_code} {c.course_title} ({c.credit_hours}س)" for c in student.registered_courses])
         reg_hours = sum(c.credit_hours for c in student.registered_courses)
         failed_str = ", ".join(student.get_failed_course_codes()) or "لا توجد"

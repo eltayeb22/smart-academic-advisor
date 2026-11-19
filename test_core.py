@@ -4,8 +4,15 @@ from pathlib import Path
 # Add project root to sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from config import STUDENT_RECORD_PATH, COURSE_CATALOG_PATH, BYLAWS_FILE_PATH
+from config import STUDENT_RECORD_PATH, COURSE_CATALOG_PATH, BYLAWS_FILE_PATH, get_student_record_path
 from utils.transcript_parser import load_student_record, load_course_catalog
+from utils.transcript_importer import (
+    export_courses_csv,
+    export_student_record_json,
+    parse_pasted_portal_text,
+    parse_uploaded_csv,
+    parse_uploaded_json,
+)
 from core.tools import calculate_projected_gpa, get_eligible_courses, analyze_academic_standing
 from core.rag_engine import search_college_bylaws
 
@@ -61,7 +68,28 @@ def test_system():
     print(f"Bylaws Excerpt:\n{query_result[:300]}...")
     assert "مرتبة الشرف" in query_result
 
-    print("\n✅ ALL CORE LOGIC TESTS PASSED SUCCESSFULLY!")
+    print("\n--- 6. Testing Transcript Import / Export & Portal Paste Parser ---")
+    csv_text = export_courses_csv(student)
+    csv_comp, csv_reg = parse_uploaded_csv(csv_text.encode("utf-8"), catalog=catalog)
+    assert len(csv_comp) == len(student.completed_courses)
+    assert len(csv_reg) == len(student.registered_courses)
+
+    json_text = export_student_record_json(student)
+    reloaded = parse_uploaded_json(json_text.encode("utf-8"))
+    assert reloaded.student_id == student.student_id
+    assert len(reloaded.completed_courses) == len(student.completed_courses)
+
+    sample_paste = """
+    1\t02-24-00101\tLinear Algebra\tFall 2023/2024\t3\tB+\tComplete
+    2\t02-24-00107\tDiscrete Structures\tSpring 2023/2024\t3\tF\tComplete
+    3\t02-24-00203\tNumerical Computations\tFall 2026/2027\t3\tN/A\tRegistered
+    """
+    p_comp, p_reg = parse_pasted_portal_text(sample_paste, catalog=catalog)
+    assert len(p_comp) == 2 and p_comp[0].grade == "B+" and p_comp[1].grade == "F"
+    assert len(p_reg) == 1 and p_reg[0].course_code == "02-24-00203"
+    print(f"CSV round-trip: {len(csv_comp)} completed, {len(csv_reg)} registered | Paste parser: OK")
+
+    print("\nALL CORE LOGIC TESTS PASSED SUCCESSFULLY!")
 
 if __name__ == "__main__":
     test_system()

@@ -15,8 +15,14 @@ DATA_DIR = BASE_DIR / "data"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Default File Paths
-_local_student_record = DATA_DIR / "student_record.json"
-STUDENT_RECORD_PATH = _local_student_record if _local_student_record.exists() else (DATA_DIR / "student_record.example.json")
+LOCAL_STUDENT_RECORD_PATH = DATA_DIR / "student_record.json"
+EXAMPLE_STUDENT_RECORD_PATH = DATA_DIR / "student_record.example.json"
+
+def get_student_record_path() -> Path:
+    """Returns the user's private local transcript if present, otherwise the sample demo record."""
+    return LOCAL_STUDENT_RECORD_PATH if LOCAL_STUDENT_RECORD_PATH.exists() else EXAMPLE_STUDENT_RECORD_PATH
+
+STUDENT_RECORD_PATH = get_student_record_path()
 COURSE_CATALOG_PATH = DATA_DIR / "course_catalog.json"
 _pdf_bylaws = DATA_DIR / "لائحة كلية الحاسبات وعلوم البيانات.pdf"
 BYLAWS_FILE_PATH = _pdf_bylaws if _pdf_bylaws.exists() else (DATA_DIR / "college_bylaws.txt")

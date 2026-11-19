@@ -54,5 +54,5 @@ Its core design separates **semantic reasoning** from **deterministic computatio
 
 ### Phase 6: Verification & Future Enhancements
 - [x] Automated unit test suite (`test_core.py`).
+- [x] Interactive transcript importer/exporter (CSV, JSON, SIS portal copy-paste, and Gemini PDF/image extraction) plus one-click semester completion.
 - [ ] Export personalized multi-semester graduation roadmap to PDF.
-- [ ] Multi-student profile uploader & automatic SIS transcript parser.

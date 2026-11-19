@@ -6,13 +6,28 @@ from pathlib import Path
 
 # Local imports
 from config import (
-    STUDENT_RECORD_PATH,
+    LOCAL_STUDENT_RECORD_PATH,
     COURSE_CATALOG_PATH,
     BYLAWS_FILE_PATH,
     DEFAULT_MODEL,
-    GEMINI_API_KEY
+    GEMINI_API_KEY,
+    get_student_record_path
 )
-from utils.transcript_parser import load_student_record, load_course_catalog
+from utils.transcript_parser import (
+    CourseRecord,
+    RegisteredCourseRecord,
+    load_student_record,
+    load_course_catalog,
+    save_student_record
+)
+from utils.transcript_importer import (
+    export_courses_csv,
+    export_student_record_json,
+    parse_pasted_portal_text,
+    parse_transcript_with_gemini,
+    parse_uploaded_csv,
+    parse_uploaded_json,
+)
 from core.tools import (
     calculate_projected_gpa,
     get_eligible_courses,
@@ -81,8 +96,9 @@ if "model_name" not in st.session_state:
     st.session_state.model_name = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
 
 # Load active data
+ACTIVE_STUDENT_PATH = get_student_record_path()
 try:
-    student = load_student_record(STUDENT_RECORD_PATH)
+    student = load_student_record(ACTIVE_STUDENT_PATH)
     catalog = load_course_catalog(COURSE_CATALOG_PATH)
 except Exception as e:
     st.error(f"خطأ في تحميل ملفات البيانات: {e}")
@@ -125,14 +141,10 @@ with st.sidebar:
         )
         
         if st.button("💾 حفظ البيانات الأكاديمية", use_container_width=True):
-            import json
-            with open(STUDENT_RECORD_PATH, "r", encoding="utf-8") as f:
-                rec_data = json.load(f)
-            rec_data["student_id"] = str(new_sid).strip()
-            rec_data["student_name"] = str(new_sname).strip()
-            rec_data["total_completed_credits"] = int(new_credits)
-            with open(STUDENT_RECORD_PATH, "w", encoding="utf-8") as f:
-                json.dump(rec_data, f, ensure_ascii=False, indent=2)
+            student.student_id = str(new_sid).strip()
+            student.student_name = str(new_sname).strip()
+            student.total_completed_credits = int(new_credits)
+            save_student_record(student, LOCAL_STUDENT_RECORD_PATH)
             st.success("تم حفظ البيانات بنجاح!")
             st.rerun()
 
@@ -257,12 +269,239 @@ with tab_chat:
 # ----------------- TAB 2: Transcript -----------------
 with tab_transcript:
     st.subheader("📊 السجل الأكاديمي المفصل (Official Transcript Record)")
-    st.info("💡 **يمكنك تصحيح أي تقدير أو عدد ساعات مباشرة بالضغط مرتين على الخلية في الجدول، ثم الضغط على زر 'حفظ التعديلات' لإعادة احتساب النقاط والـ GPA فوراً.**")
-    
+    grade_options = ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "F", "(F)", "Abs"]
+
+    # --- 1. Import / Export Panel ---
+    with st.expander("📥 استيراد أو تصدير كشف الدرجات (Import / Export Transcript)", expanded=False):
+        imp_tab_file, imp_tab_paste, imp_tab_ai, imp_tab_export = st.tabs([
+            "📄 رفع ملف (CSV / JSON)",
+            "📋 لصق من موقع الكلية",
+            "🖼️ استخراج ذكي (PDF / صورة)",
+            "⬇️ تحميل نسخة / قالب"
+        ])
+
+        with imp_tab_file:
+            st.caption("ارفع ملف `student_record.json` كامل أو ملف `CSV` يحتوي على أعمدة: `course_code, course_title, credit_hours, semester, grade, status`.")
+            uploaded_tr = st.file_uploader(
+                "اختر ملف كشف الدرجات (JSON أو CSV):",
+                type=["json", "csv"],
+                key="transcript_file_uploader"
+            )
+            import_mode_file = st.radio(
+                "طريقة الاستيراد:",
+                ["استبدال السجل الحالي بالكامل", "إضافة ودمج مع السجل الحالي"],
+                horizontal=True,
+                key="import_mode_file"
+            )
+            if uploaded_tr is not None and st.button("✅ تطبيق واستيراد الملف", type="primary", key="btn_apply_file"):
+                try:
+                    raw_bytes = uploaded_tr.getvalue()
+                    if uploaded_tr.name.lower().endswith(".json"):
+                        parsed_rec = parse_uploaded_json(raw_bytes)
+                        if import_mode_file == "استبدال السجل الحالي بالكامل":
+                            student = parsed_rec
+                        else:
+                            student.completed_courses.extend(parsed_rec.completed_courses)
+                            student.registered_courses.extend(parsed_rec.registered_courses)
+                            student.recalculate_academic_metrics()
+                    else:
+                        comp_list, reg_list = parse_uploaded_csv(raw_bytes, catalog=catalog)
+                        if import_mode_file == "استبدال السجل الحالي بالكامل":
+                            student.completed_courses = comp_list
+                            student.registered_courses = reg_list
+                        else:
+                            student.completed_courses.extend(comp_list)
+                            student.registered_courses.extend(reg_list)
+                        student.recalculate_academic_metrics()
+
+                    save_student_record(student, LOCAL_STUDENT_RECORD_PATH)
+                    st.success(f"تم استيراد كشف الدرجات بنجاح! (مكتمل: {len(student.completed_courses)} | مسجل: {len(student.registered_courses)} | GPA: {student.current_gpa:.4f})")
+                    st.rerun()
+                except Exception as ex:
+                    st.error(f"تعذر قراءة الملف: {ex}")
+
+        with imp_tab_paste:
+            st.caption("حدد جدول المواد من بوابة الجامعة بالماوس (Ctrl+C) والصقه هنا مباشرة (Ctrl+V)، وسيتم استخراج الكود والسمستر والساعات والتقدير تلقائياً.")
+            pasted_text = st.text_area(
+                "الصق نص كشف الدرجات هنا:",
+                height=160,
+                placeholder="مثال:\n02-24-00101\tLinear Algebra\tFall 2023/2024\t3\tB\tComplete\n02-24-00203\tNumerical Computations\tFall 2026/2027\t3\tN/A\tRegistered",
+                key="pasted_portal_text"
+            )
+            import_mode_paste = st.radio(
+                "طريقة الحفظ:",
+                ["استبدال السجل الحالي بالكامل", "إضافة ودمج مع السجل الحالي"],
+                horizontal=True,
+                key="import_mode_paste"
+            )
+            if st.button("🔎 استخراج وحفظ النص الملصق", type="primary", key="btn_apply_paste"):
+                comp_list, reg_list = parse_pasted_portal_text(pasted_text, catalog=catalog)
+                if not comp_list and not reg_list:
+                    st.warning("لم يتم التعرف على أي مقررات في النص. تأكد من وجود كود المادة (مثل 02-24-00101) في كل صف.")
+                else:
+                    if import_mode_paste == "استبدال السجل الحالي بالكامل":
+                        student.completed_courses = comp_list
+                        student.registered_courses = reg_list
+                    else:
+                        student.completed_courses.extend(comp_list)
+                        student.registered_courses.extend(reg_list)
+                    student.recalculate_academic_metrics()
+                    save_student_record(student, LOCAL_STUDENT_RECORD_PATH)
+                    st.success(f"تم استخراج وحفظ {len(comp_list)} سجل مكتمل و {len(reg_list)} مقرر مسجل بنجاح!")
+                    st.rerun()
+
+        with imp_tab_ai:
+            st.caption("ارفع ملف PDF رسمي أو لقطة شاشة واضحة ومكبرة لكشف الدرجات، وسيستخدم النظام Gemini لاستخراج جميع المقررات والتقديرات تلقائياً.")
+            uploaded_media = st.file_uploader(
+                "ارفع كشف الدرجات (PDF / PNG / JPG):",
+                type=["pdf", "png", "jpg", "jpeg"],
+                key="transcript_ai_uploader"
+            )
+            if uploaded_media is not None and st.button("🤖 استخراج الدرجات بالذكاء الاصطناعي", type="primary", key="btn_ai_extract"):
+                if not st.session_state.api_key:
+                    st.error("يرجى إدخال مفتاح Google Gemini API في الشريط الجانبي أولاً.")
+                else:
+                    with st.spinner("جاري قراءة كشف الدرجات واستخراج المقررات عبر Gemini..."):
+                        try:
+                            mime_map = {
+                                ".pdf": "application/pdf",
+                                ".png": "image/png",
+                                ".jpg": "image/jpeg",
+                                ".jpeg": "image/jpeg",
+                            }
+                            ext = Path(uploaded_media.name).suffix.lower()
+                            extracted = parse_transcript_with_gemini(
+                                file_bytes=uploaded_media.getvalue(),
+                                mime_type=mime_map.get(ext, "application/octet-stream"),
+                                api_key=st.session_state.api_key,
+                                model_name=st.session_state.model_name,
+                                catalog=catalog,
+                            )
+                            st.session_state["ai_extracted_transcript"] = extracted
+                            st.success(
+                                f"تم استخراج {len(extracted['completed_courses'])} سجل مكتمل و {len(extracted['registered_courses'])} مقرر مسجل. راجع النتيجة أدناه ثم اضغط اعتماد وحفظ."
+                            )
+                        except Exception as ex:
+                            st.error(f"فشل الاستخراج عبر الذكاء الاصطناعي: {ex}")
+
+            if "ai_extracted_transcript" in st.session_state:
+                ext_data = st.session_state["ai_extracted_transcript"]
+                if ext_data["completed_courses"]:
+                    st.write("**المقررات المكتملة المستخرجة (معاينة):**")
+                    st.dataframe(
+                        pd.DataFrame([
+                            {
+                                "الكود": c.course_code,
+                                "المقرر": c.course_title,
+                                "الساعات": c.credit_hours,
+                                "الفصل": c.semester,
+                                "التقدير": c.grade,
+                            }
+                            for c in ext_data["completed_courses"]
+                        ]),
+                        use_container_width=True,
+                        hide_index=True,
+                    )
+                if st.button("💾 اعتماد وحفظ البيانات المستخرجة في السجل", type="primary", key="btn_confirm_ai"):
+                    if ext_data.get("student_name"):
+                        student.student_name = ext_data["student_name"]
+                    if ext_data.get("student_id"):
+                        student.student_id = ext_data["student_id"]
+                    if ext_data.get("major"):
+                        student.major = ext_data["major"]
+                    student.completed_courses = ext_data["completed_courses"]
+                    student.registered_courses = ext_data["registered_courses"]
+                    student.recalculate_academic_metrics()
+                    save_student_record(student, LOCAL_STUDENT_RECORD_PATH)
+                    del st.session_state["ai_extracted_transcript"]
+                    st.success("تم حفظ السجل المستخرج بنجاح!")
+                    st.rerun()
+
+        with imp_tab_export:
+            st.caption("حمّل نسخة احتياطية من سجلك الحالي أو استخدم ملف CSV كقالب جاهز لتعبئة درجاتك في Excel ثم إعادة رفعه.")
+            dl_col1, dl_col2 = st.columns(2)
+            with dl_col1:
+                st.download_button(
+                    label="⬇️ تحميل كشف الدرجات (CSV / Excel)",
+                    data=export_courses_csv(student).encode("utf-8"),
+                    file_name="student_transcript.csv",
+                    mime="text/csv",
+                    use_container_width=True,
+                )
+            with dl_col2:
+                st.download_button(
+                    label="⬇️ تحميل السجل الكامل (JSON)",
+                    data=export_student_record_json(student).encode("utf-8"),
+                    file_name="student_record.json",
+                    mime="application/json",
+                    use_container_width=True,
+                )
+
+    # --- 2. Quick Add Course from Catalog ---
+    with st.expander("➕ إضافة مقرر جديد بسرعة من دليل الكلية", expanded=False):
+        catalog_options = [f"{c.code} | {c.name} ({c.credit_hours} س)" for c in catalog.courses]
+        catalog_options.append("مقرر مخصص (إدخال يدوي)")
+        selected_cat_opt = st.selectbox("اختر المقرر:", options=catalog_options, key="quick_add_course_select")
+
+        if selected_cat_opt == "مقرر مخصص (إدخال يدوي)":
+            qa_c1, qa_c2, qa_c3 = st.columns([1.2, 2.3, 0.8])
+            qa_code = qa_c1.text_input("رمز المقرر:", placeholder="CS101", key="qa_custom_code")
+            qa_title = qa_c2.text_input("اسم المقرر:", placeholder="Course Title", key="qa_custom_title")
+            qa_hrs = qa_c3.number_input("الساعات:", min_value=0, max_value=6, value=3, key="qa_custom_hrs")
+        else:
+            sel_code = selected_cat_opt.split(" | ")[0].strip()
+            sel_course = catalog.get_course(sel_code)
+            qa_code = sel_course.code
+            qa_title = sel_course.name
+            qa_hrs = sel_course.credit_hours
+
+        qa_r1, qa_r2, qa_r3 = st.columns([1.2, 1, 1])
+        qa_status = qa_r1.selectbox("الحالة:", ["مكتمل (Complete)", "مسجل حالياً (Registered)"], key="qa_status")
+        qa_sem = qa_r2.text_input("الفصل الدراسي:", value="Fall 2026/2027", key="qa_sem")
+        qa_grade = qa_r3.selectbox(
+            "التقدير:",
+            options=grade_options,
+            disabled=(qa_status == "مسجل حالياً (Registered)"),
+            key="qa_grade"
+        )
+
+        if st.button("➕ إضافة المقرر وحفظ السجل", use_container_width=True, key="btn_quick_add"):
+            if not qa_code.strip():
+                st.warning("يرجى إدخال رمز المقرر.")
+            else:
+                if qa_status == "مسجل حالياً (Registered)":
+                    student.registered_courses.append(
+                        RegisteredCourseRecord(
+                            course_code=qa_code.strip(),
+                            course_title=qa_title.strip() or qa_code.strip(),
+                            credit_hours=int(qa_hrs),
+                            semester=qa_sem.strip() or "Fall 2026/2027",
+                            status="Registered",
+                        )
+                    )
+                else:
+                    new_rec = CourseRecord(
+                        course_code=qa_code.strip(),
+                        course_title=qa_title.strip() or qa_code.strip(),
+                        credit_hours=int(qa_hrs),
+                        grade=qa_grade,
+                        semester=qa_sem.strip() or "Fall 2026/2027",
+                    )
+                    new_rec.points = new_rec.calculate_points()
+                    new_rec.passed = new_rec.check_passed()
+                    student.completed_courses.append(new_rec)
+                    student.recalculate_academic_metrics()
+
+                save_student_record(student, LOCAL_STUDENT_RECORD_PATH)
+                st.success(f"تمت إضافة المقرر {qa_code} وحفظ السجل بنجاح!")
+                st.rerun()
+
+    # --- 3. Editable Completed Courses Table ---
+    st.info("💡 **يمكنك تعديل أي تقدير أو ساعة، أو إضافة صف جديد أسفل الجدول، أو حذف صف بتحديده ثم الضغط على Delete — ثم اضغط 'حفظ التعديلات' لإعادة احتساب النقاط والـ GPA فوراً.**")
+
     courses_data = []
-    for i, c in enumerate(student.completed_courses):
+    for c in student.completed_courses:
         courses_data.append({
-            "#": i + 1,
             "رمز المقرر": c.course_code,
             "اسم المقرر": c.course_title,
             "الساعات": int(c.credit_hours),
@@ -271,40 +510,51 @@ with tab_transcript:
             "النقاط": round(c.calculate_points(), 3),
             "الحالة": "✅ ناجح" if c.passed else "❌ راسب (F)"
         })
-    
-    df_transcript = pd.DataFrame(courses_data)
-    grade_options = ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "F", "(F)", "Abs"]
-    
+
+    df_transcript = pd.DataFrame(courses_data) if courses_data else pd.DataFrame(
+        columns=["رمز المقرر", "اسم المقرر", "الساعات", "الفصل الدراسي", "التقدير", "النقاط", "الحالة"]
+    )
+
     edited_df = st.data_editor(
         df_transcript,
         use_container_width=True,
         hide_index=True,
+        num_rows="dynamic",
         key="transcript_data_editor",
         column_config={
-            "#": st.column_config.NumberColumn(disabled=True, width="small"),
-            "رمز المقرر": st.column_config.TextColumn(disabled=True),
-            "اسم المقرر": st.column_config.TextColumn(disabled=True),
-            "الساعات": st.column_config.NumberColumn(min_value=0, max_value=6, step=1, required=True),
-            "الفصل الدراسي": st.column_config.TextColumn(),
-            "التقدير": st.column_config.SelectboxColumn(options=grade_options, required=True),
+            "رمز المقرر": st.column_config.TextColumn(required=True),
+            "اسم المقرر": st.column_config.TextColumn(required=True),
+            "الساعات": st.column_config.NumberColumn(min_value=0, max_value=6, step=1, default=3, required=True),
+            "الفصل الدراسي": st.column_config.TextColumn(default="Fall 2026/2027"),
+            "التقدير": st.column_config.SelectboxColumn(options=grade_options, default="B", required=True),
             "النقاط": st.column_config.NumberColumn(disabled=True, format="%.3f"),
             "الحالة": st.column_config.TextColumn(disabled=True)
         }
     )
 
     if st.button("💾 حفظ التعديلات وإعادة حساب النقاط والـ GPA فوراً", type="primary", use_container_width=True):
-        from utils.transcript_parser import save_student_record
-        
-        for idx, row in edited_df.iterrows():
-            if idx < len(student.completed_courses):
-                course = student.completed_courses[idx]
-                course.credit_hours = int(row["الساعات"])
-                course.grade = str(row["التقدير"]).strip().upper()
-                course.semester = str(row["الفصل الدراسي"]).strip()
+        updated_courses = []
+        for _, row in edited_df.iterrows():
+            code = str(row.get("رمز المقرر", "") or "").strip()
+            if not code:
+                continue
+            title = str(row.get("اسم المقرر", "") or "").strip() or code
+            hrs = int(row["الساعات"]) if pd.notna(row.get("الساعات")) else 3
+            sem = str(row.get("الفصل الدراسي", "") or "Unknown").strip()
+            grade = str(row.get("التقدير", "F") or "F").strip()
+            updated_courses.append(
+                CourseRecord(
+                    course_code=code,
+                    course_title=title,
+                    credit_hours=hrs,
+                    grade=grade,
+                    semester=sem,
+                )
+            )
 
-        # Recalculate all points and GPA strictly from bylaws automatically
+        student.completed_courses = updated_courses
         student.recalculate_academic_metrics()
-        save_student_record(student, STUDENT_RECORD_PATH)
+        save_student_record(student, LOCAL_STUDENT_RECORD_PATH)
         st.success(f"✅ تم تحديث السجل بنجاح! الساعات المنجزة: {student.total_completed_credits} | النقاط الإجمالية: {student.total_quality_points:.3f} | الـ GPA الجديد: {student.current_gpa:.4f}")
         st.rerun()
 
@@ -313,18 +563,87 @@ with tab_transcript:
         st.warning(f"⚠️ **تنبيه أكاديمي:** المقررات الراسبة النشطة وغير المعادة بعد: `{', '.join(failed_courses)}`. تنص اللائحة على ضرورة إعادة تسجيل هذه المقررات لفتح المتطلبات المعتمدة عليها.")
 
     st.divider()
-    st.subheader("📝 المقررات المسجلة للفصل الحالي (Registered - Fall 2026/2027)")
+
+    # --- 4. Editable Current Semester Registered Courses + Complete Semester ---
+    st.subheader("📝 المقررات المسجلة للفصل الحالي (Current Registered Courses)")
     reg_data = [
         {
             "رمز المقرر": r.course_code,
             "اسم المقرر": r.course_title,
-            "الساعات": r.credit_hours,
+            "الساعات": int(r.credit_hours),
             "الفصل الدراسي": r.semester,
             "الحالة": r.status
         }
         for r in student.registered_courses
     ]
-    st.dataframe(pd.DataFrame(reg_data), use_container_width=True, hide_index=True)
+    df_reg = pd.DataFrame(reg_data) if reg_data else pd.DataFrame(
+        columns=["رمز المقرر", "اسم المقرر", "الساعات", "الفصل الدراسي", "الحالة"]
+    )
+    edited_reg_df = st.data_editor(
+        df_reg,
+        use_container_width=True,
+        hide_index=True,
+        num_rows="dynamic",
+        key="registered_courses_editor",
+        column_config={
+            "رمز المقرر": st.column_config.TextColumn(required=True),
+            "اسم المقرر": st.column_config.TextColumn(required=True),
+            "الساعات": st.column_config.NumberColumn(min_value=0, max_value=6, step=1, default=3, required=True),
+            "الفصل الدراسي": st.column_config.TextColumn(default="Fall 2026/2027"),
+            "الحالة": st.column_config.TextColumn(default="Registered", disabled=True),
+        }
+    )
+
+    if st.button("💾 حفظ قائمة المقررات المسجلة", use_container_width=True, key="btn_save_registered"):
+        updated_reg = []
+        for _, row in edited_reg_df.iterrows():
+            code = str(row.get("رمز المقرر", "") or "").strip()
+            if not code:
+                continue
+            updated_reg.append(
+                RegisteredCourseRecord(
+                    course_code=code,
+                    course_title=str(row.get("اسم المقرر", "") or code).strip(),
+                    credit_hours=int(row["الساعات"]) if pd.notna(row.get("الساعات")) else 3,
+                    semester=str(row.get("الفصل الدراسي", "") or "Fall 2026/2027").strip(),
+                    status="Registered",
+                )
+            )
+        student.registered_courses = updated_reg
+        save_student_record(student, LOCAL_STUDENT_RECORD_PATH)
+        st.success(f"تم حفظ المقررات المسجلة بنجاح ({len(updated_reg)} مقرر)!")
+        st.rerun()
+
+    if student.registered_courses:
+        with st.expander("🎓 إنهاء الفصل الحالي ونقل المقررات المسجلة بدرجاتها للسجل", expanded=False):
+            st.caption("عند صدور نتائج هذا الفصل، أدخل تقديرك الفعلي لكل مادة واضغط على الزر لنقلها تلقائياً إلى السجل المكتمل وتحديث الـ GPA.")
+            final_grades_map = {}
+            for idx, r in enumerate(student.registered_courses):
+                fc1, fc2 = st.columns([3, 1.2])
+                fc1.markdown(f"**{r.course_code}** — {r.course_title} ({r.credit_hours} ساعات)")
+                final_grades_map[idx] = fc2.selectbox(
+                    "التقدير النهائي:",
+                    options=grade_options,
+                    index=3,
+                    key=f"finalize_grade_{idx}",
+                    label_visibility="collapsed"
+                )
+            if st.button("✅ ترحيل نتائج الفصل إلى السجل المكتمل", type="primary", use_container_width=True, key="btn_finalize_sem"):
+                for idx, r in enumerate(student.registered_courses):
+                    student.completed_courses.append(
+                        CourseRecord(
+                            course_code=r.course_code,
+                            course_title=r.course_title,
+                            credit_hours=r.credit_hours,
+                            grade=final_grades_map[idx],
+                            semester=r.semester,
+                        )
+                    )
+                student.registered_courses = []
+                student.recalculate_academic_metrics()
+                save_student_record(student, LOCAL_STUDENT_RECORD_PATH)
+                st.success(f"تم ترحيل درجات الفصل بنجاح! الساعات المنجزة الآن: {student.total_completed_credits} | الـ GPA الجديد: {student.current_gpa:.4f}")
+                st.rerun()
 
 # ----------------- TAB 3: What-If GPA Simulator -----------------
 with tab_simulator:

@@ -10,13 +10,14 @@ from config import (
     PROBATION_MAX_CREDIT_HOURS,
     TOTAL_GRADUATION_CREDITS,
     STUDENT_RECORD_PATH,
-    COURSE_CATALOG_PATH
+    COURSE_CATALOG_PATH,
+    get_student_record_path
 )
 from utils.transcript_parser import load_student_record, load_course_catalog, StudentRecord, CourseCatalog
 
 def _get_active_student() -> StudentRecord:
     """Helper to load the current active student record."""
-    return load_student_record(STUDENT_RECORD_PATH)
+    return load_student_record(get_student_record_path())
 
 def _get_active_catalog() -> CourseCatalog:
     """Helper to load the active course catalog."""
