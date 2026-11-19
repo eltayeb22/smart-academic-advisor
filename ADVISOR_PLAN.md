@@ -1,4 +1,4 @@
-# 🎓 Smart Academic Advisor — Architectural Blueprint & Implementation Plan
+# Smart Academic Advisor — Architectural Blueprint & Implementation Plan
 
 ## 1. Project Overview
 **Smart Academic Advisor** is an intelligent academic advising assistant built with Python, the **`google-genai`** SDK, and **Streamlit**.

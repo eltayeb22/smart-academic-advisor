@@ -1,4 +1,4 @@
-# 🎓 Smart Academic Advisor
+# Smart Academic Advisor
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Google GenAI](https://img.shields.io/badge/Google%20GenAI-Gemini%20API-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
@@ -10,17 +10,17 @@ It combines **Retrieval-Augmented Generation (RAG)** over official university cr
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-- **📜 Bylaws RAG Engine (`core/rag_engine.py`)**: Parses university credit-hour regulation PDFs and retrieves relevant articles (probation rules, credit limits, repetition policies, graduation & honors criteria) on demand.
-- **🧮 Deterministic Function Calling Tools (`core/tools.py`)**:
+- **Bylaws RAG Engine (`core/rag_engine.py`)**: Parses university credit-hour regulation PDFs and retrieves relevant articles (probation rules, credit limits, repetition policies, graduation & honors criteria) on demand.
+- **Deterministic Function Calling Tools (`core/tools.py`)**:
   - `calculate_projected_gpa`: Computes exact semester and cumulative GPA projections for new courses and repeated/retaken courses without LLM guesswork.
   - `get_eligible_courses`: Validates the prerequisite graph in Python, filters out completed and currently registered courses, and flags active failed courses as priority retakes.
   - `analyze_academic_standing`: Determines academic standing, permitted credit-hour load, graduation progress (140 credit hours), and honors degree eligibility.
   - `search_college_bylaws`: Queries indexed faculty bylaws articles directly from the agent loop.
-- **⚡ Low-Latency Gemini Agent (`core/advisor_agent.py`)**: Uses direct student-context injection and automatic zero-delay model failover (`gemini-3.5-flash-lite` → `gemini-3.5-flash` → `gemini-3.8-flash`) to handle API demand spikes seamlessly.
-- **📊 Automated Grading Scale Engine (`config.py`, `utils/transcript_parser.py`)**: Automatically computes course quality points, pass/fail status, course-repetition replacement rules, and cumulative GPA strictly according to the official 4.0 grading scale.
-- **💻 Interactive 4-Tab Streamlit Dashboard (`app.py`)**:
+- **Low-Latency Gemini Agent (`core/advisor_agent.py`)**: Uses direct student-context injection and automatic zero-delay model failover (`gemini-3.5-flash-lite` -> `gemini-3.5-flash` -> `gemini-3.8-flash`) to handle API demand spikes seamlessly.
+- **Automated Grading Scale Engine (`config.py`, `utils/transcript_parser.py`)**: Automatically computes course quality points, pass/fail status, course-repetition replacement rules, and cumulative GPA strictly according to the official 4.0 grading scale.
+- **Interactive 4-Tab Streamlit Dashboard (`app.py`)**:
   1. **AI Advisor Chat**: Conversational advisor with quick-prompt shortcuts and tool-backed answers.
   2. **Editable Transcript (`st.data_editor`)**: Inline editing of course grades, credit hours, and semesters with automatic GPA recalculation.
   3. **What-If GPA Simulator**: Pre-populated with currently registered semester courses and active failed courses for instant scenario modeling.
@@ -28,7 +28,7 @@ It combines **Retrieval-Augmented Generation (RAG)** over official university cr
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```mermaid
 flowchart TD
@@ -66,7 +66,7 @@ flowchart TD
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 smart-academic-advisor/
@@ -96,7 +96,7 @@ smart-academic-advisor/
 
 ---
 
-## 📈 Official Grading Scale (4.0 System)
+## Official Grading Scale (4.0 System)
 
 Course quality points are calculated automatically as `Grade Points × Credit Hours`:
 
@@ -116,7 +116,7 @@ Course quality points are calculated automatically as `Grade Points × Credit Ho
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Clone the Repository
 ```bash
@@ -162,7 +162,7 @@ python test_core.py
 
 ---
 
-## 🔒 Privacy & Security
+## Privacy & Security
 
 - **API Secrets**: `.env` is excluded via `.gitignore` and never committed.
 - **Personal Academic Records**: `data/student_record.json` is excluded via `.gitignore`. Only the fictional demo file (`data/student_record.example.json`) is tracked in this public repository.
